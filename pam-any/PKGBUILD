@@ -1,0 +1,44 @@
+# Maintainer: Skruppy <skruppy@onmars.eu>
+
+pkgname=pam-any
+pkgver=r2.519c3f4
+pkgrel=1
+pkgdesc='A PAM module that runs multiple other PAM modules in parallel, succeeding as long as one of them succeeds'
+arch=('i686' 'x86_64')
+url="https://github.com/ChocolateLoverRaj/pam-any"
+# license=('')
+depends=('glibc' 'gcc-libs' 'pam')
+makedepends=('cargo' 'git' 'clang')
+source=("git+https://github.com/ChocolateLoverRaj/$pkgname.git#commit=519c3f48d1ab642ce0eaa65be9d01d84a90fbce6")
+sha256sums=('SKIP')
+
+
+pkgver() {
+    cd "$srcdir/$pkgname"
+    echo "r$(git rev-list --count HEAD).$(git rev-parse --short=7 HEAD)"
+}
+
+
+prepare() {
+    cd "$srcdir/$pkgname"
+    export RUSTUP_TOOLCHAIN=stable
+    cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
+}
+
+build() {
+    cd "$srcdir/$pkgname"
+    export RUSTUP_TOOLCHAIN=stable
+    export CARGO_TARGET_DIR=target
+    cargo build --frozen --release --all-features
+}
+
+check() {
+    cd "$srcdir/$pkgname"
+    export RUSTUP_TOOLCHAIN=stable
+    cargo test --frozen --all-features
+}
+
+package() {
+    cd "$srcdir/$pkgname"
+    install -Dm0755 "$pkgdir/usr/lib/security/pam_any.so" "target/release/libpam_any.so"
+}
