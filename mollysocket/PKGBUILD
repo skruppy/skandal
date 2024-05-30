@@ -1,0 +1,54 @@
+# Maintainer: Skruppy <skruppy@onmars.eu>
+
+pkgname=mollysocket
+pkgver=1.4.0
+pkgrel=1
+pkgdesc='Allows Molly client to get Signal notifications via UnifiedPush'
+arch=('x86_64' 'arm64' 'armv7')
+url="https://github.com/mollyim/mollysocket"
+license=('AGPL-3.0')
+depends=('glibc' 'gcc-libs' 'sqlite' 'openssl')
+makedepends=('cargo')
+source=(
+  "$pkgname-$pkgver.tar.gz::https://github.com/mollyim/$pkgname/archive/refs/tags/$pkgver.tar.gz"
+  "$pkgname.toml"
+  "$pkgname.service"
+  "$pkgname.sysusers"
+  "$pkgname.tmpfiles"
+)
+sha256sums=(
+  '7c0f99135c614d0308f4c57e3edb15c2f318bd5382806414fe942ccc8388b469'
+  'b8ba79fe48b2d31a6c376dc79fff3ef37ea8eff9cfea67467f71f7772d0b3cfe'
+  '9058f91b8ef97247eef49e49123ddf9a2d4cb2cadf733fe5cdf261ae1624fb27'
+  '2691cc34a0ca2e99164c4be18bdfe8dd960b21ea013d733d27a962a91b40764e'
+  '8c7a161a377dfd19b880dd4dc25cfd56f00969640334cd2f9d07568e67885830'
+)
+backup=(etc/$pkgname.toml)
+
+
+prepare() {
+    cd "$srcdir/$pkgname-$pkgver"
+    export RUSTUP_TOOLCHAIN=stable
+    cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
+}
+
+build() {
+    cd "$srcdir/$pkgname-$pkgver"
+    export RUSTUP_TOOLCHAIN=stable
+    export CARGO_TARGET_DIR=target
+    cargo build --frozen --release --all-features
+}
+
+check() {
+    cd "$srcdir/$pkgname-$pkgver"
+    export RUSTUP_TOOLCHAIN=stable
+    cargo test --frozen --all-features
+}
+
+package() {
+    install -Dm 755 "$pkgname-$pkgver/target/release/mollysocket" "$pkgdir/usr/bin/$pkgname"
+    install -Dm 644 "$pkgname.toml"     "$pkgdir/etc/mollysocket/config.toml"
+    install -Dm 644 "$pkgname.service"  "$pkgdir/usr/lib/systemd/system/$pkgname.service"
+    install -Dm 644 "$pkgname.sysusers" "$pkgdir/usr/lib/sysusers.d/$pkgname.conf"
+    install -Dm 644 "$pkgname.tmpfiles" "$pkgdir/usr/lib/tmpfiles.d/$pkgname.conf"
+}

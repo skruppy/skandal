@@ -1,0 +1,18 @@
+pkgbase = mollysocket
+	pkgdesc = Allows getting Signal notifications via UnifiedPush
+	pkgver = 1.4.0
+	pkgrel = 1
+	url = https://github.com/mollyim/mollysocket
+	arch = x86_64
+	arch = arm64
+	arch = armv7
+	license = AGPL-3.0
+	makedepends = cargo
+	makedepends = git
+	makedepends = clang
+	depends = glibc
+	depends = gcc-libs
+	source = git+https://github.com/mollyim/mollysocket.git#commit=1.4.0
+	sha256sums = SKIP
+
+pkgname = mollysocket

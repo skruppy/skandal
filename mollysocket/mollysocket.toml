@@ -1,0 +1,7 @@
+# host = "127.0.0.1"
+# port = 8020
+# webserver = true
+# signal_env = "Production"
+# allowed_endpoints = ["*"]
+# allowed_uuids = ["*"]
+# db = "./mollysocket.db"
