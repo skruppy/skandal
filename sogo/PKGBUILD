@@ -1,0 +1,82 @@
+# Maintainer: Deon Spengler <deon at spengler dot co dot za>
+# Contributor: DJ Lucas <dj_AT_linuxfromscratch_DOT_ort>
+# Contributor: Steven Hiscocks <steven [at] hiscocks [dot] me [dot] uk>
+# Contributor:  Andre Wayand <aur-sogo@awayand.sleepmail.com>
+pkgname=sogo
+pkgdesc="groupware server built around OpenGroupware.org (OGo) and the SOPE application server"
+pkgver=5.11.0
+pkgrel=1
+arch=('x86_64')
+url="http://www.sogo.nu/"
+license=('GPL')
+options=('!strip')
+replaces=('sogo2')
+install=sogo.install
+makedepends=('gcc-objc'
+             'gnustep-make')
+depends=("sope>=${pkgver}"
+         'gnustep-base'
+         'libmemcached'
+         'memcached'
+         'libwbxml>=0.11.7-2'
+         'mariadb-libs'
+         'postgresql-libs'
+         'inetutils'
+         'libsodium'
+         'libytnef'
+         'libzip'
+         'oath-toolkit')
+optdepends=('postgresql: run database server for sogo locally'
+            'mariadb: run database server for sogo locally'
+            'openldap: run directory server for sogo locally'
+            'postfix: run smtp server for sogo locally'
+            'dovecot: run imap server for sogo locally'
+            'courier-imap: run imap server for sogo locally'
+            'nginx: webserver to provide web interface locally'
+            'apache: webserver to provide web interface locally'
+            'lighttpd: webserver to provide web interface locally')
+backup=('etc/sogo/sogo.conf'
+        'etc/httpd/conf/extra/SOGo.conf'
+        'etc/conf.d/sogo')
+source=("https://packages.sogo.nu/sources/SOGo-${pkgver}.tar.gz"
+        "01-reproduceable_build.patch"
+        "05-fix_crypt.patch"
+        "sogo.service"
+        "sogo.confd")
+sha512sums=('04a4f6ff8d799c51001c5bd86c00a73a299440d5e4c9a169c061a1e6f28fced2536336208cb760441cdd8ade467a4bedf61216f8083afde4b36d9a20c7ebea46'
+            '2759cd4d17d864c3ceefd509d8d9fc1f7616a4153b4070e1f40b70e1553204349a3da1cd0c94916f7ea84c5ef1a4946838488066ad4b6510c59aab96174f185c'
+            'edb134a0fcc5dc5a6231a39f6e05cf5100c0a055c7af2264121066f008287b2e23ff17dad72c6e3fa6c0de8714d2049b6b287bb132cc29b1a1871ac4340150c5'
+            '73de6719ba3c17fb03dba4c7390f1e99ac4adff4c3413b6031ebb807fcef8a3f5eb0b8e3767a9560c2106b2f3470447b52803f5bd2f562b382e99c6382be2879'
+            '51803a53f5ae32017281e3c891ae21c126a6adc10529669bd659cc4bffaeaae46a59db34c0c97bbc83e9e3be5e619e4ced170e18b31c1267d3c14ce20b54ccf4')
+
+prepare() {
+  cd "SOGo-${pkgver}"
+  patch -Np1 -i ../01-reproduceable_build.patch
+  patch -Np1 -i ../05-fix_crypt.patch
+}
+
+build() {
+  cd "SOGo-${pkgver}"
+  ./configure --prefix=$(gnustep-config --variable=GNUSTEP_SYSTEM_ROOT) --disable-debug --enable-mfa
+  make
+}
+
+package() {
+  cd "SOGo-${pkgver}"
+  make install DESTDIR="${pkgdir}"
+  install -D -m 0644 "${srcdir}"/sogo.service \
+                     "${pkgdir}"/usr/lib/systemd/system/sogo.service
+  install -D -m 0600 "${srcdir}"/SOGo-${pkgver}/Scripts/sogo.conf \
+                     "${pkgdir}"/etc/sogo/sogo.conf
+  install -D -m 0644 "${srcdir}"/SOGo-${pkgver}/Apache/SOGo.conf \
+                     "${pkgdir}"/etc/httpd/conf/extra/SOGo.conf
+  install -D -m 0644 "${srcdir}"/SOGo-${pkgver}/Scripts/logrotate \
+                     "${pkgdir}"/etc/logrotate.d/sogo
+  install -d -m 0755 "${pkgdir}"/usr/lib/sogo/scripts
+  install    -m 0755 "${srcdir}"/SOGo-${pkgver}/Scripts/sql-*.sh \
+                      "${pkgdir}"/usr/lib/sogo/scripts/
+  install -D -m 0644 "${srcdir}"/sogo.confd \
+                     "${pkgdir}"/etc/conf.d/sogo
+  cd "${srcdir}/SOGo-${pkgver}/ActiveSync"
+  make PYTHON=/usr/bin/python2 install DESTDIR="${pkgdir}" GNU_SYSTEM_ADMIN_TOOLS="/usr/bin"
+}

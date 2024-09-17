@@ -1,0 +1,98 @@
+diff -ur a/Main/SOGo.m b/Main/SOGo.m
+--- a/Main/SOGo.m	2024-08-07 11:10:59.000000000 +0200
++++ b/Main/SOGo.m	2024-09-17 23:46:41.875445155 +0200
+@@ -99,8 +99,8 @@
+   SoClassSecurityInfo *sInfo;
+   NSArray *basicRoles;
+ 
+-  [self logWithFormat: @"version %@ (build %@) -- starting",
+-        SOGoVersion, SOGoBuildDate];
++  [self logWithFormat: @"version %@ -- starting",
++        SOGoVersion];
+ 
+   defaults = [SOGoSystemDefaults sharedSystemDefaults];
+   doCrashOnSessionCreate = [defaults crashOnSessionCreate];
+diff -ur a/SoObjects/SOGo/GNUmakefile b/SoObjects/SOGo/GNUmakefile
+--- a/SoObjects/SOGo/GNUmakefile	2024-08-07 11:10:59.000000000 +0200
++++ b/SoObjects/SOGo/GNUmakefile	2024-09-17 23:46:41.875445155 +0200
+@@ -100,9 +100,6 @@
+ 	\
+ 	SOGoAdmin.h
+ 
+-all::
+-	@touch SOGoBuild.m
+-
+ SOGo_OBJC_FILES = \
+ 	SOGoBuild.m			\
+ 	SOGoProductLoader.m		\
+diff -ur a/SoObjects/SOGo/SOGoBuild.h b/SoObjects/SOGo/SOGoBuild.h
+--- a/SoObjects/SOGo/SOGoBuild.h	2024-08-07 11:10:59.000000000 +0200
++++ b/SoObjects/SOGo/SOGoBuild.h	2024-09-17 23:46:41.875445155 +0200
+@@ -23,7 +23,6 @@
+ #ifndef BUILD_H
+ #define BUILD_H
+ 
+-extern NSString *SOGoBuildDate;
+ extern NSString *SOGoVersion;
+ 
+ #endif /* BUILD_H */
+diff -ur a/SoObjects/SOGo/SOGoBuild.m b/SoObjects/SOGo/SOGoBuild.m
+--- a/SoObjects/SOGo/SOGoBuild.m	2024-08-07 11:10:59.000000000 +0200
++++ b/SoObjects/SOGo/SOGoBuild.m	2024-09-17 23:46:41.875445155 +0200
+@@ -22,7 +22,6 @@
+ 
+ #import <Foundation/NSString.h>
+ 
+-NSString *SOGoBuildDate = SOGO_BUILD_DATE;
+ NSString *SOGoVersion = (SOGO_MAJOR_VERSION
+                          @"." SOGO_MINOR_VERSION
+                          @"." SOGO_SUBMINOR_VERSION);
+diff -ur a/UI/SOGoUI/UIxComponent.h b/UI/SOGoUI/UIxComponent.h
+--- a/UI/SOGoUI/UIxComponent.h	2024-08-07 11:10:59.000000000 +0200
++++ b/UI/SOGoUI/UIxComponent.h	2024-09-17 23:46:41.875445155 +0200
+@@ -121,7 +121,6 @@
+ - (WOResponse *) redirectToLocation: (NSString *) newLocation;
+ 
+ /* Debugging */
+-- (NSString *) buildDate;
+ - (BOOL) isUIxDebugEnabled;
+ 
+ @end
+diff -ur a/UI/SOGoUI/UIxComponent.m b/UI/SOGoUI/UIxComponent.m
+--- a/UI/SOGoUI/UIxComponent.m	2024-08-07 11:10:59.000000000 +0200
++++ b/UI/SOGoUI/UIxComponent.m	2024-09-17 23:46:41.875445155 +0200
+@@ -758,11 +758,6 @@
+ 
+ /* debugging */
+ 
+-- (NSString *) buildDate
+-{
+-  return SOGoBuildDate;
+-}
+-
+ - (BOOL) isUIxDebugEnabled
+ {
+   SOGoSystemDefaults *sd;
+diff -ur a/UI/Templates/MainUI/SOGoRootPage.wox b/UI/Templates/MainUI/SOGoRootPage.wox
+--- a/UI/Templates/MainUI/SOGoRootPage.wox	2024-08-07 11:10:59.000000000 +0200
++++ b/UI/Templates/MainUI/SOGoRootPage.wox	2024-09-17 23:46:41.875445155 +0200
+@@ -375,8 +375,6 @@
+     <md-dialog flex="50" flex-xs="100">
+       <md-dialog-content class="md-dialog-content">
+         <p><a href="http://sogo.nu/" target="_new">sogo.nu</a></p>
+-        <p>Version <var:string value="version"/> (<var:string value="buildDate" />)</p>
+-        <br/>
+         <p><var:string label:value="AboutBox" const:escapeHTML="NO"/></p>
+         <!--<img class="full-image" const:alt="Inverse" rsrc:src="img/inverse.png"/>-->
+       </md-dialog-content>
+diff -ur a/UI/Templates/UIxPageFrame.wox b/UI/Templates/UIxPageFrame.wox
+--- a/UI/Templates/UIxPageFrame.wox	2024-08-07 11:10:59.000000000 +0200
++++ b/UI/Templates/UIxPageFrame.wox	2024-09-17 23:46:41.875445155 +0200
+@@ -18,7 +18,6 @@
+         <meta name="description" content="SOGo Web Interface" />
+         <meta name="author" content="Inverse inc." />
+         <meta name="robots" content="noindex, nofollow" />
+-        <meta name="build" var:content="buildDate" />
+         <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1" />
+         <link href="mailto:support@sogo.nu" rev="made" />
+         <link rel="shortcut icon" var:href="siteFavicon" type="image/x-icon" />
